@@ -1,44 +1,38 @@
-import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
-import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils'
-import { Widget } from '@lumino/widgets';
-
-/**
- * Initialization data for the test_labs extension.
- */
+import { JupyterFrontEnd,JupyterFrontEndPlugin} from '@jupyterlab/application';
+import { ILauncher } from '@jupyterlab/launcher';
+import { reactIcon } from '@jupyterlab/ui-components';
+import {  MainAreaWidget } from '@jupyterlab/apputils';
+import { CounterWidget } from './widget'
+namespace CommandIDs {
+  export const create = 'create-react-widget';
+}
 const extension: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab-apod',
+  id: 'react-widget',
   autoStart: true,
-  // requires: [ICommandPalette],
-  activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
-    console.log('JupyterLab extension jupyterlab_apod is activated!');
-  
-    // Create a blank content widget inside of a MainAreaWidget
-    const content = new Widget();
-    const widget = new MainAreaWidget({ content });
-    widget.id = 'apod-jupyterlab';
-    widget.title.label = 'Astronomy Picture';
-    widget.title.closable = true;
-  
-    // Add an application command
-    const command: string = 'apod:open';
-    app.commands.addCommand(command, {
-      label: 'Random Astronomy Picture',
-      execute: () => {
-        if (!widget.isAttached) {
-          // Attach the widget to the main work area if it's not there
-          app.shell.add(widget, 'main');
-        }
-        // Activate the widget
-        app.shell.activateById(widget.id);
+  optional: [ILauncher],
+  activate: (app: JupyterFrontEnd, launcher: ILauncher) => {
+      const { commands } = app;
+      const command = CommandIDs.create;
+      commands.addCommand(command, {
+          caption: 'Create a new React Widget',
+          label: 'React Widget',
+          icon: reactIcon,
+          // icon: (args) => (args['isPalette'] ? null : reactIcon),
+          execute: () => {
+              const content = new CounterWidget();
+              const widget = new MainAreaWidget<CounterWidget>({content});
+              widget.title.label = 'React Widget';
+              widget.title.icon = reactIcon;
+              app.shell.add(widget, 'main');
+          },
+      });
+
+      if (launcher) {
+          launcher.add({
+              command,
+          })
       }
-    });
-  
-    // Add the command to the palette.
-    palette.addItem({ command, category: 'Tutorial' });
   }
-};
+}
 
 export default extension;

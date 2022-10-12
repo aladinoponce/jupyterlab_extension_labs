@@ -1,16 +1,44 @@
-import {ToolbarButton} from '@jupyterlab/apputils'
-import { DocumentRegistry } from '@jupyterlab/docregistry'
-import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook'
-import { IDisposable } from '@lumino/disposable';
+import { ToolbarButton } from '@jupyterlab/apputils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+import {
+    NotebookActions,
+    NotebookPanel,
+    INotebookModel,
+} from '@jupyterlab/notebook'
 
-export class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel,INotebookModel> {
-    //create the toolbar button
-    createNew(widget: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): void | IDisposable {
-        let myButton = new ToolbarButton({
-            label: 'Labs',
-            onClick: () => alert('Hecho!')
+
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+
+
+export class ButtonExtension
+    implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
+{
+    /**
+     * Create a new extension for the notebook panel widget.
+     *
+     * @param panel Notebook panel
+     * @param context Notebook context
+     * @returns Disposable on the added button
+     */
+
+    createNew(
+        panel: NotebookPanel,
+        context: DocumentRegistry.IContext<INotebookModel>
+    ): IDisposable {
+        const clearOutput = () => {
+            alert('Esta es la extension creada por Aladino Ponce')
+            NotebookActions.clearAllOutputs(panel.content);
+        };
+        const button = new ToolbarButton({
+            className: 'clear-output-button',
+            label: 'Lab Extension MELI',
+            onClick: clearOutput,
+            tooltip: 'Clear All Outputs',
         });
-        widget.toolbar.insertItem(10,'myButton', myButton);
-        return myButton;
+
+        panel.toolbar.insertItem(10, 'clearOutputs', button);
+        return new DisposableDelegate(() => {
+            button.dispose();
+        });
     }
 }
